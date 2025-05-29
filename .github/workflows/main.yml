@@ -1,0 +1,53 @@
+name: Docker CI/CD
+
+on:
+  push:
+    branches: [ "main" ] # Ejecutar en push a la rama main
+  pull_request:
+    branches: [ "main" ] # Ejecutar también en pull requests a main (sin el push a Docker Hub)
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest # Usar la última versión de Ubuntu
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4 # Acción para clonar el repositorio
+
+    - name: Set up Python
+      uses: actions/setup-python@v5 # Acción para configurar Python
+      with:
+        python-version: '3.9' # Especificar la versión de Python
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run tests with pytest
+      run: |
+        pytest --cov=app --cov-report=xml # Ejecutar pruebas y generar reporte de cobertura en XML
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }} # Opcional: si usas Codecov.io
+        # file: ./coverage.xml # Descomentar si el archivo es coverage.xml
+        # flags: unittests # Opcional: para categorizar la cobertura
+      # Si no usas Codecov, puedes comentar o eliminar este paso de "Upload coverage"
+
+    - name: Login to Docker Hub
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' # Solo en push a main
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and push Docker image
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' # Solo en push a main
+      uses: docker/build-push-action@v5
+      with:
+        context: . # Contexto de construcción es el directorio raíz del repo
+        file: ./Dockerfile # Ruta al Dockerfile
+        push: true # Empujar la imagen
+        tags: <yemi4>/mi_app_docker:latest, <yemi4>/mi-app-docker:${{ github.sha }} # Etiquetar con 'latest' y con el hash del commit
