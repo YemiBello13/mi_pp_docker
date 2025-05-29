@@ -1,0 +1,33 @@
+# Entornos virtuales
+venv/
+.venv/
+env/
+ENV/
+*/venv/
+*/.venv/
+
+# Archivos de caché de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos de pytest y cobertura
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Archivos de configuración local de VS Code
+.vscode/
+
+# Archivos de sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos de setup.py build/dist (si los usaras)
+build/
+dist/
+*.egg-info/
+
+# Archivos de Docker (si es necesario, aunque Dockerfile sí va)
+# *.dockerignore (si usas uno muy específico y no quieres versionarlo)
